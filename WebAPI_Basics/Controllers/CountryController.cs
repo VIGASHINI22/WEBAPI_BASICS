@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI_Basics.Data;
+using WebAPI_Basics.DTO.Country;
 using WebAPI_Basics.Models;
 
 namespace WebAPI_Basics.Controllers
@@ -45,20 +46,29 @@ namespace WebAPI_Basics.Controllers
             
         }
 
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public ActionResult<Country> Create([FromBody]Country country)
+        public ActionResult<CreateCountryDTO> Create([FromBody]CreateCountryDTO countryDTO)
         {
-            var result = _dbContext.countries.AsQueryable().Where(x => x.Name.ToLower().Trim() == country.Name.ToLower().Trim()).Any();
+            var result = _dbContext.countries.AsQueryable().Where(x => x.Name.ToLower().Trim() == countryDTO.Name.ToLower().Trim()).Any();
             if (result)
             {
                 return Conflict("Country Already Exists in Database, u mf!!");
             }
+
+            Country country = new Country();
+            country.Name = countryDTO.Name;
+            country.ShortName = countryDTO.ShortName;
+            country.CountryCode = countryDTO.CountryCode;
+
+
             _dbContext.countries.Add(country);
             _dbContext.SaveChanges();
             return CreatedAtAction("GetById", new { id = country.Id }, country);
         }
+
 
 
         [HttpPut("{id:int}")]
@@ -114,3 +124,6 @@ namespace WebAPI_Basics.Controllers
 
     }
 }
+
+
+
